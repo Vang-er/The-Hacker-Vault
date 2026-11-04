@@ -74,9 +74,17 @@ def logout(request):
 def handleroot(request):
     if not (request.user.is_authenticated):
         return redirect("/login/")
-    return redirect("/dashboard/")
+    return redirect("/inventory/")
 
     
 @login_required(login_url="/login/")
 def dashboard(request):
+    return redirect("/inventory/")
+
+@login_required(login_url="/login/")
+def inventory_view(request):
     return render(request, "index.html")
+
+@login_required(login_url="/login/")
+def history_view(request):
+    return render(request,"history.html")
