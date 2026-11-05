@@ -9,13 +9,62 @@
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen">
     {% csrf_token %}
-
-    <!-- I WILL GET SOME SLEEP AND FINISH THAT LATER, Good Night <3 -->
-
     <nav
-        class="w-full bg-white border-b border-gray-300 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
-    
+        class="w-full bg-white border-b border-gray-300 px-6 py-3 flex items-center justify-between sticky top-0 z-30"
+    >
+
+    <div class="flex items-center gap-4">
+        <span class="text-sm font-bold tracking-tight text-gray-900">
+            Hacker Warehouse
+        </span>
+        <a
+            href="/inventory/"
+            class="cursor-pointer text-sm font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition"
+        >
+            Inventory
+        </a>
+        <a
+            href="/history/"
+            class="cursor-pointer text-sm font-bold px-3 py-1.5 rounded-lg bg-gray-200 transition"
+        >
+            History
+        </a>
+    </div>
+    <div class="flex-1"></div>
+    <div style="margin-left:auto;" class="flex items-center">
+        <a
+            href="/logout/"
+            class="text-sm font-bold text-red-600 hover:underline px-3 py-1.5 cursor-pointer"
+        >
+            Logout
+        </a>
+    </div>
     </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-6">
+        <div class="flex items-center justify-between border-b pb-4 mb-4">
+            <div class="flex items-center gap-3"
+                <h1 class="text-2xl font-bold">Stock History</h1>
+                <span
+                    id="numlogs"
+                    class="text-xs font-bold bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full"
+                >
+                    Loading...
+                </span>
+            </div>
+            <button
+                type="button"
+                onclick="exportHistoryToCSV()"
+                class="cursor-pointer text-sm font-bold bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded-lg shadow-xs transition"
+            >
+                Export CSV
+            </button>
+        </div>
+
+        <div id="history-list" class="space-y-3"></div>
+    </main>
+
+    <script></script> <!-- Will contain the Script Duhhh-->
     
 </body>
 </html>
