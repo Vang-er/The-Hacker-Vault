@@ -43,7 +43,7 @@
 
     <main class="max-w-4xl mx-auto px-4 py-6">
         <div class="flex items-center justify-between border-b pb-4 mb-4">
-            <div class="flex items-center gap-3"
+            <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold">Stock History</h1>
                 <span
                     id="numlogs"
@@ -64,7 +64,162 @@
         <div id="history-list" class="space-y-3"></div>
     </main>
 
-    <script></script> <!-- Will contain the Script Duhhh-->
-    
+    <script>
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+            const numlogs = document.getElementById("numlogs");
+            const historyList = document.getElementById("history-list");
+            let stockMap = {};
+
+            async function loadhistory() {
+                try {
+                    const response = await fetch("/api/stock-movements/");
+                    const history = await response.json();
+                    numlogs.innerText = `${history.count} movements`;
+                    
+                    historyList.innerHTML ="";
+                    if (history.results.length  === 0) {
+                        historyList.innerHTML = `
+                        <p class="text-center text-gray-500 py-8 italic">No Stock movements recorded yet...</p>
+                    `;
+                    return;
+                }
+
+                history.results.forEach((item) =>{
+                    const card = document.createElement("div");
+                    const isNegative = item.quantity < 0;
+                    card.className = `bg-white border border-gray-200 ${isNegative ? "border-l-4 border-l-red-500" : "border-l-4 border-l-green-600"} rounded-xl p-4 shadow-xs flex justify-between items-center transition hover:shadow-md`;
+                    
+                    card.innerHTML=`
+                    <div>
+                        <h2 class="font-bold text-base text-gray-900">${item.variant_name}</h2>
+                        <p class="text-xs font-mono text-gray-500">SKU: ${item.sku}</p>
+                        <p class="text-xs text-gray-600 mt-1">
+                            Reason: <span class="font-semibold text-gray-800">${item.note || item.reason}</span>
+                        </p>
+                    </div>
+
+
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <p class="font-bold text-xs uppercase tracking-wider text-gray-500">
+                                ${item.movement_type}
+                            </p>
+                            <p class="text-base font-bold ${isNegative? 'text-red-600': 'text-green-700'}">
+                                ${item.quantity > 0 ? "+" : ""}${item.quantity}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                Balance: <span class="font-semibold">${item.balance_after}</span>
+                            </p>
+                        </div>
+                        
+                        <button
+                            type="button"
+                            onclick="undoMovement(${item.variant}, ${item.quantity}, '${(item.variant_name || '').replace(/'/g, "\\'")}')"
+                            class="bg-gray-800 hover:bg-black text-white text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition active:scale-95"
+                        >
+                            Undo
+                        </button>
+                    </div>
+                `;
+                historyList.appendChild(card);
+                });
+            } catch (err) {
+                historyList.innerHTML = `
+                    <p class="text-center text-red-500 py-6">Could not load history.</p>
+                `;
+            } 
+        }
+
+        async function undoMovement(variantId, quantity,variantName) {
+            const isWithdrawal = quantity <0;
+            const reverseQty = Math.abs(quantity);
+            const confirmMsg = isWithdrawal
+                ? `Restore +${reverseQty} units of "${variantName}" back to stock?`
+                : `Remove -${reverseQty} unites of "${variantName}" from stock?`;
+            if (!confirm(confirmMsg)) return;
+
+            let stockId= stockMap[variantId];
+            if (!stockId) {
+                const res= await fetch("/api/stock/");
+                const data= await res.json();
+                const stocks = data.results || data;
+                stocks.forEach((st)=> (stockMap[st.variant] = st.id));
+                stockId = stockMap[variantId] || variantId;
+            }
+            const endpoint = isWithdrawal
+                ? `/api/stock/${stockId}/receive/`
+                : `/api/stock/${stockId}/issue/`;
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken,
+                    },
+                    body: JSON.stringify({
+                        quantity: reverseQty,
+                        note: `Undo (${variantName})`
+                    }),
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || "Failed to reverse the transaction");
+                }
+                alert(`Successfully reversed ${reverseQty} units.`);
+                await loadhistory();
+            } catch(err) {
+                alert("Cannot Undo: " + err.message);
+            }
+        }
+
+
+        async function exportHistoryToCSV() {
+            try {
+                const response = await fetch("/api/stock-movements/");
+                const data = await response.json();
+                const logs = data.results || data;
+
+                if (!logs || logs.length === 0) {
+                    alert("No History to export.");
+                    return;
+                }
+
+                const headers = ["Variant Name", "SKU", "Type", "Quantity", "Balance After", "Reason / Note", "Date"];
+                const rows = logs.map((item) => {
+                    const date = new Date(item.created_at).toLocaleString().replace(","," -");
+                    const noteOrReason = (item.note || item.reason || "").replace(/"/g,'""');
+                    const variantName = (item.variant_name || "").replace(/"/g, '""');
+
+                    return [
+                        `"${variantName}"`,
+                        `"${item.sku}"`,
+                        `"${item.movement_type}"`,
+                        item.quantity,
+                        item.balance_after,
+                        `"${noteOrReason}"`,
+                        `"${date}"`,
+                    ].join(",");
+                });
+
+                const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;"});
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+
+                link.href = url;
+                link.download = `warehouse_history_${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert("Failed to export CSV: " + err.message);
+            }
+        }
+
+
+        document.addEventListener("DOMContentLoaded", loadhistory);
+    </script>
 </body>
 </html>
