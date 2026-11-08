@@ -48,6 +48,10 @@
       </div>
     </nav>
     <div class="" id="homepage">
+
+
+
+      
       <div
         id="window"
         class="p-6 z-50 hidden mx-auto my-auto w-115 h-135 rounded-2xl bg-gray-500 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -151,9 +155,9 @@
               <button
                 id="browser-back"
                 onclick="showRootCategories()"
-                class="hidden cursor-pointer rounde-lg bg-gray-800 hover:bg-black px-3 py-1.5 text-xs font-bold text-white transition active:scale-95"
+                class="hidden cursor-pointer rounded-lg bg-gray-800 hover:bg-black px-3 py-1.5 text-xs font-bold text-white transition active:scale-95"
               >
-                <- Back
+                <-Back
               </button>
               <h1 id="browser-title" class="text-2xl font-bold text-gray-900">Categories</h1>
             </div>
@@ -339,8 +343,7 @@
     function createProductCard(product) {
       const card = document.createElement("div");
 
-      card.className =
-        "cursor-pointer rounded-2xl bg-white p-5 shadow transition hover:scale-[1.02]";
+      card.className = "cursor-pointer rounded-xl bg-white border border-gray-200 p-5 shadow-xs transition hover:border-gray-400 hover:shadow-sm";
 
       card.innerHTML = `
         <h2 class="text-xl font-bold">
@@ -371,7 +374,7 @@
       product.variants.forEach((variant) => {
         const card = document.createElement("div");
 
-        card.className = "rounded-2xl bg-white p-5 shadow";
+        card.className = "rounded-xl bg-white border border-gray-200 p-5 shadow-xs transition hover:shadow-md";
 
         const stockId = stockMap[variant.id] || variant.id;
         const currentSelectedQty = withdrawCart[variant.id]?.quantity || 0;
@@ -618,174 +621,6 @@
     checkSearch();
 
     window.addEventListener("resize", checkSearch);
-    async function loadhistory() {
-      const response = await fetch("/api/stock-movements/");
-      const history = await response.json();
-      numlogs.innerText = `History logs number:${history.count}`;
-      const historyList = document.getElementById("history-list");
-      historyList.innerText = "";
-      history.results.forEach((item) => {
-        const card = document.createElement("div");
-
-        if (item.quantity < 0) {
-          card.className =
-            "bg-red-300 rounded-xl p-4 shadow flex justify-between items-center border-l-red-500 border-l-3 hover:scale-105 duration:300 transition-all";
-        } else if (item.quantity > 0) {
-          card.className =
-            "bg-green-500 rounded-xl p-4 shadow flex justify-between items-center border-l-green-700 border-l-3 hover:scale-105 duration:300 transition-all";
-        }
-        card.innerHTML = `
-      <div>
-        <h2 class="font-bold text-lg">
-          ${item.variant_name}
-        </h2>
-
-        <p class="text-sm text-gray-600">
-          SKU: ${item.sku}
-        </p>
-
-        <p class="text-sm">
-          Reason: <span class="font-semibold">${item.note || item.reason}</span>
-        </p>
-      </div>
-
-
-      <div class="flex items-center gap-3">
-        <div class="text-right">
-          <p class="font-bold text-xs uppercase tracking-wider text-gray-700">
-            ${item.movement_type}
-          </p>
-
-          <p class="text-lg font-bold">
-            ${item.quantity > 0 ? "+" : ""}${item.quantity}
-          </p>
-
-          <p class="text-sm text-gray-600 font-semibold">
-            Balance: ${item.balance_after}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onclick="undoMovement(${item.variant}, ${item.quantity}, '${(item.variant_name || '').replace(/'/g, "\\'")}')"
-          class="bg-gray-900 hover:bg-black active:scale-95 text-white"
-          title="Undo"
-        >
-          Undo
-        </button>
-      </div>
-    `;
-
-        historyList.appendChild(card);
-      });
-    }
-
-    async function exportHistoryToCSV() {
-      try {
-        const response = await fetch("/api/stock-movements/")
-        const data = await response.json();
-        const logs = data.results || data;
-
-        if (logs.length === 0 ) {
-          alert("No History to export");
-          return;
-        }
-
-        const headers = ["variantName", "SKU", "Type", "Quantity", "Balance After", "Reason / Note", "Data"];
-        const rows = logs.map((item) => {
-          const data = new Date(item.created_at).toLocaleString().replace(",", " -");
-          const noteOrReason = (item.note || item.reason || "").replace(/"/g, '""');
-          const variantName = (item.variant_name || "").replace(/"/g, '""');
-
-          return [
-            `"${variantName}"`,
-            `"${item.sku}"`,
-            `"${item.movement_type}"`,
-            item.quantity,
-            item.balance_after,
-            `"${noteOrReason}"`,
-            `"${data}"`,
-          ].join(",");
-        });
-
-        const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
-        const blob = new Blob([csvContent], {type:"text/csv;charset=utf-8;"});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `warehouse_history_${new Date().toISOString().slice(0,10)}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        alert("Faild to export CSV:" + err.message);
-      }
-    }
-
-    async function undoMovement(variantId, quantity, variantName) {
-      const isWithdrawal = quantity <0;
-      const reverseQty = Math.abs(quantity);
-      const confirmMsg = isWithdrawal
-        ? `Undo withdrawal and restore +${reverseQty} units of "${variantName}" back to stock?`
-        : `Undo intake and remove -${reverseQty} units of "${variantName}" from stock?`;
-      if (!confirm(confirmMsg)) return;
-
-      let stockId = stockMap[variantId];
-      if (!stockId) {
-        const res = await fetch("/api/stock/");
-        const data = await res.json();
-        const stocks = data.results || data;
-        stocks.forEach((st) => (stockMap[st.variant] = st.id));
-        stockId = stockMap[variantId] || variantId;
-      }
-
-      const endpoint = isWithdrawal
-      ? `/api/stock/${stockId}/receive/`
-      : `/api/stock/${stockId}/issue/`;
-
-
-      try {
-        const response = await fetch(endpoint, {
-          method:"POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
-          },
-
-          body: JSON.stringify({
-            quantity: reverseQty,
-            note: `Undo (${variantName})`
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.detail || "Failed to reverse the transaction");
-        }
-        alert(`Success! Reversed ${reverseQty} units of "${variantName}".`);
-
-        await loadhistory();
-        await loadInventory();
-
-      } catch (err) {
-        alert("Cannot Undo:" + err.message);
-      }
-    }
-
-    function showhistory() {
-      homepage.classList.add("hidden");
-      historypage.classList.remove("hidden");
-      historypage.classList.add("flex");
-      loadhistory();
-    }
-    function showhome2() {
-      historypage.classList.remove("flex");
-      historypage.classList.add("hidden");
-      homepage.classList.remove("hidden");
-    }
-    function showhome() {}
     addcat.addEventListener("click", () => {
       catpresser = true;
       stockpressed = false;
