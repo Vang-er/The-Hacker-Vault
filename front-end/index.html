@@ -141,48 +141,55 @@
           />
         </form>
       </div>
-      <button
-        onclick="showwindow()"
-        class="rounded-4xl bg-gray-400 w-10 h-10 absolute bottom-4 right-3 cursor-pointer justify-center items-center text-2xl font-bold shadow-[0_4px_0_#666] transition-all duration-100 active:translate-y-1 active:shadow-[0_1px_0_#666] active:bg-gray-400"
-      >
-        +
-      </button>
       <div id="backdrop" class="hidden fixed inset-0 bg-black/40 z-40"></div>
-      <div id="catdisplay" class="w-full h-full"></div>
-      <div id="inventory-browser" class="w-full">
-        <div class="flex items-center gap-3 mb-4 mt-3">
-          <button
-            id="browser-back"
-            onclick="showRootCategories()"
-            class="hidden rounded-xl bg-gray-600 px-4 py-2 text-white"
-          >
-            ← Back
-        </button>
 
-          <h1 id="browser-title" class="text-2xl font-bold">Categories</h1>
+
+      <main class="max-w-6xl mx-auto px-6 py-6">
+        <div id="inventory-browser" class="w-full">
+          <div class="flex items-center justify-between border-b pb-4 mb-6">
+            <div class="flex items-center gap-3">
+              <button
+                id="browser-back"
+                onclick="showRootCategories()"
+                class="hidden cursor-pointer rounde-lg bg-gray-800 hover:bg-black px-3 py-1.5 text-xs font-bold text-white transition active:scale-95"
+              >
+                <- Back
+              </button>
+              <h1 id="browser-title" class="text-2xl font-bold text-gray-900">Categories</h1>
+            </div>
+
+            <button
+              type="button"
+              onclick="showwindow()"
+              class="cursor-pointer text-sm font-bold bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg transition active:scale-95 flex items-center gap-1.5"
+            >
+              <span>+</span> Add Items
+            </button>
+          </div>
+
+          <div
+            id="browser-grid"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          ></div>
         </div>
+      </main>
 
-        <div
-          id="browser-grid"
-          class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        ></div>
-      </div>
+
+
+
     </div>
     <div id="withdraw-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden bg-gray-800 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border-2 border-green-400">
       <div>
         <span class="text-xs uppercase tracking-wide text-gray-400">Total:</span>
         <div id="withdraw-total-count" class="text-lg font-bold text-green-300">0</div>
       </div>
-      <button id="withdraw-btn" onclick="executeBatchWithdraw()" class="bg-green-500 hover:bg-green-600 active:scale-95 text-black font-extrabold px-5 py-2.5 rounded-x1 cursor-pointer transition-all shadow-md">
+      <button id="withdraw-btn" onclick="executeBatchWithdraw()" class="bg-green-500 hover:bg-green-600 active:scale-95 text-black font-extrabold px-5 py-2.5 rounded-xl cursor-pointer transition-all shadow-md">
         Confirm Withdrawal
       </button>
       <button onclick="clearWithdrawCart()" class="text-xs text-red-400 hover:underline cursor-pointer">
         Clear
       </button>
     </div>
-
-    <div class="flex items-center justify-between w-full px-4 mt-2"></div>
-    <div></div>
   </body>
   <script>
     const catslect = document.getElementById("catslect");
@@ -364,7 +371,7 @@
       product.variants.forEach((variant) => {
         const card = document.createElement("div");
 
-        card.className = "rounded-2xl bg-white p-5 shawdo";
+        card.className = "rounded-2xl bg-white p-5 shadow";
 
         const stockId = stockMap[variant.id] || variant.id;
         const currentSelectedQty = withdrawCart[variant.id]?.quantity || 0;
@@ -432,7 +439,7 @@
             oninput="updateWithdrawReason(${variant.id}, this.value)"
             value="${withdrawCart[variant.id]?.reason || ''}"
             placeholder="Reason (Sale, Damaged, Demo...)"
-            class="w-full text-xs px-3 py-1.5 border border-gary-300 rounded-lg outline-none bg-gray-50 focus:bg-white focus:border-black transition-colors"
+            class="w-full text-xs px-3 py-1.5 border border-gray-300 rounded-lg outline-none bg-gray-50 focus:bg-white focus:border-black transition-colors"
           />
         </div>
         `;
