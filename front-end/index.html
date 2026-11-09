@@ -102,8 +102,137 @@
           </button>
         </div>
 
+        <form id="cat" class="flex flex-col gap-3">
+          {% csrf_token %}
+          <div>
+            <label for="catname" class="block text-xs font-bold text-gray-700 mb-1">Category Name*</label>
+            <input
+              id="catname"
+              type="text"
+              required
+              placeholder="Tools, Sensors, Cables, etc."
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+          <div>
+            <label for="catdes" class="block text-xs font-bold text-gray-700 mb-1">Description</label>
+            <input
+              id="catdes"
+              type="text"
+              placeholder="Optional short description..."
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+            <label></label>
+            <select
+              id="catsect"
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            >
+              <option value="">No Parent</option>
+            </select>
+          <button
+            type="submit"
+            class="mt-2 w-full cursor-pointer bg-gray-900 hover:bg-black text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-98"
+          >
+            Create Category
+          </button>
+        </form>
+
+        <form id="pro" class="hidden flex-col gap-3">
+          <div>
+            <label for="proname" class="block text-xs font-bold text-gray-700 mb-1">Product Name*</label>
+            <input
+              id="proname"
+              type="text"
+              required
+              placeholder="Soldering Iron, Arduino Uno, etc."
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+
+          <div>
+            <label for="procat" class="block text-xs font-bold text-gray-700 mb-1">Category*</label>
+            <select 
+              id="procat"
+              required
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            >
+              <option value="">Select a Category...</option>
+            </select>
+          </div>
 
 
+          <div>
+            <label for="probrand" class="block text-xs font-bold text-gray-700 mb-1">Brand</label>
+            <input
+              id="probrand"
+              type="text"
+              placeholder="Generic, Nivida, etc."
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+
+          <div>
+            <label for="prodes" class="block text-xs font-bold text-gray-700 mb-1">Description</label>
+            <input
+              id="prodes"
+              type="text"
+              placeholder="Optional notes.."
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+          <button
+            type="submit"
+            class="mt-2 w-full cursor-pointer bg-gray-900 hover:bg-block text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-98"
+          >
+            Create Product
+        </button>
+        </form>
+
+        <form id="stock" class="hidden flex-col gap-3">
+          <div>
+            <label for="prostc" class="block text-xs font-bold text-gray-700 mb-1">Select Item Variant*</label>
+            <select
+              id="prostc"
+              required
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            >
+              <option value="">Select an Item..</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="stockqty" class="block text-xs font-bold text-gray-700 mb-1">Quantity to Receive*</label>
+            <input
+              id="stockqty"
+              type="number"
+              min="1"
+              value="1"
+              required
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+
+          <div>
+            <label for="stocknote" class="block text-xs font-bold text-gray-700 mb-1">Intake Note</label>
+            <input
+              id="stocknote"
+              type="text"
+              placeholder="Restock, Supplier delivery, etc."
+              class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
+            />
+          </div>
+
+          <button 
+            type="submit"
+            class="mt-2 w-full cursor-pointer bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-98"
+          >
+            Receive Into Stock
+          </button>
+        </form>
+      </div>
+
+    
 
       <main class="max-w-6xl mx-auto px-6 py-6">
         <div id="inventory-browser" class="w-full">
@@ -360,7 +489,6 @@
               </div>
             </div>
 
-            <!-- 👇 NEW: Counter Section -->
             <div class="mt-4 pt-3 border-t flex items-center justify-between">
               <span class="text-xs font-bold uppercase text-gray-600">Withdraw:</span>
 
