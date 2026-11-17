@@ -79,7 +79,7 @@
           <button
             type="button"
             id="addcat"
-            onclick="switchTap('cat')"
+            onclick="switchTab('cat')"
             class="flex-1 py-1.5 text-xs font-bold rounded-md bg-white text-gray-900 shadow-xs cursor-pointer transition"
           >
             Category
@@ -87,7 +87,7 @@
           <button
             type="button"
             id="addpro"
-            onclick="switchTap('pro')"
+            onclick="switchTab('pro')"
             class="flex-1 py-1.5 text-xs font-bold rounded-md text-gray-600 hover:text-gray-900 cursor-pointer transition"
           >
             Product
@@ -95,7 +95,7 @@
           <button
             type="button"
             id="addstock"
-            onclick="switchTap('stock')"
+            onclick="switchTab('stock')"
             class="flex-1 py-1.5 text-xs font-bold rounded-md text-gray-600 hover:text-gray-900 cursor-pointer transition"
           >
             Stock Intake
@@ -125,7 +125,7 @@
           </div>
             <label></label>
             <select
-              id="catsect"
+              id="catslect"
               class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
             >
               <option value="">No Parent</option>
@@ -183,7 +183,7 @@
           </div>
           <button
             type="submit"
-            class="mt-2 w-full cursor-pointer bg-gray-900 hover:bg-block text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-98"
+            class="mt-2 w-full cursor-pointer bg-gray-900 hover:bg-black text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-98"
           >
             Create Product
         </button>
@@ -223,7 +223,7 @@
             />
           </div>
 
-          <button 
+          <button
             type="submit"
             class="mt-2 w-full cursor-pointer bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-98"
           >
@@ -706,115 +706,60 @@
     checkSearch();
 
     window.addEventListener("resize", checkSearch);
-    addcat.addEventListener("click", () => {
-      catpresser = true;
-      stockpressed = false;
+    
+    function switchTab(tab) {
+      const forms = {
+        cat: document.getElementById("cat"),
+        pro: document.getElementById("pro"),
+        stock: document.getElementById("stock")
+      };
+      const btns = {
+        cat: document.getElementById("addcat"),
+        pro: document.getElementById("addpro"),
+        stock: document.getElementById("addstock")
+      };
 
-      addcat.style.backgroundColor = "#4B5563";
-      addstock.style.backgroundColor = "#6B7280";
-    });
+      Object.keys(forms).forEach((key) => {
+        const isActive = key === tab;
+        forms[key].classList.toggle("hidden", !isActive);
+        forms[key].classList.toggle("flex", isActive);
 
-    addstock.addEventListener("click", () => {
-      stockpressed = true;
-      catpresser = false;
-
-      addstock.style.backgroundColor = "#4B5563";
-      addcat.style.backgroundColor = "#6B7280";
-    });
+        btns[key].className = isActive
+          ? "flex-1 py-1.5 text=xs font-bold rounded-md bg-white text-gray-900 shadow-xs cursor-pointer transition"
+          : "flex-1 py-1.5 text=xs font-bold rounded-md text-gray-600 hover:text-gray-900 cursor-pointer transition";
+      });
+    }
 
     function showwindow() {
       swindow.classList.remove("hidden");
       backdrop.classList.remove("hidden");
+      populateModalDropdowns();
     }
+
     function hidewindow() {
       swindow.classList.add("hidden");
       backdrop.classList.add("hidden");
     }
 
-    addvariants.addEventListener("click", () => {
-      catpresser = false;
-      stockpressed = false;
-      varpressed = true;
-      propressed = false;
-      addvariants.style.backgroundColor = "#4B5563";
-      addstock.style.backgroundColor = "#6B7280";
-      addcat.style.backgroundColor = "#6B7280";
-      addpro.style.backgroundColor = "#6B7280";
-      cat.style.display = "none";
-      stock.style.display = "none";
-      productform.style.display = "none";
-      variantform.style.display = "flex";
-    });
-    addpro.addEventListener("click", () => {
-      stockpressed = false;
-      catpresser = false;
-      varpressed = false;
-      propressed = true;
-      addpro.style.backgroundColor = "#4B5563";
-      addcat.style.backgroundColor = "#6B7280";
-      addstock.style.backgroundColor = "#6B7280";
-      addvariants.style.backgroundColor = "#6B7280";
-      cat.style.display = "none";
-      stock.style.display = "none";
-      productform.style.display = "flex";
-      variantform.style.display = "none";
-    });
-    addcat.addEventListener("click", () => {
-      catpresser = true;
-      stockpressed = false;
-      varpressed = false;
-      propressed = false;
-      addcat.style.backgroundColor = "#4B5563";
-      addstock.style.backgroundColor = "#6B7280";
-      addpro.style.backgroundColor = "#6B7280";
-      addvariants.style.backgroundColor = "#6B7280";
-      cat.style.display = "flex";
-      stock.style.display = "none";
-      productform.style.display = "none";
-      variantform.style.display = "none";
-    });
-    addstock.addEventListener("click", () => {
-      stockpressed = true;
-      catpresser = false;
-      varpressed = false;
-      propressed = false;
-      addstock.style.backgroundColor = "#4B5563";
-      addcat.style.backgroundColor = "#6B7280";
-      addpro.style.backgroundColor = "#6B7280";
-      addvariants.style.backgroundColor = "#6B7280";
-      cat.style.display = "none";
-      stock.style.display = "flex";
-      productform.style.display = "none";
-      variantform.style.display = "none";
-    });
-    addcat.style.backgroundColor = "#4B5563";
-    addstock.style.backgroundColor = "#6B7280";
-    addstock.addEventListener("click", () => {
-      stockpressed = true;
-      catpresser = false;
-      addstock.style.backgroundColor = "#4B5563";
-      addcat.style.backgroundColor = "#6B7280";
-    });
-    loadInventory();
-    cat.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const name = document.getElementById("catname").value;
-      const description = document.getElementById("catdes").value;
-      const parent = document.getElementById("catslect").value;
-      const response = await fetch("/api/categories/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        body: JSON.stringify({
-          name: name,
-          description: description,
-          parent: parent === "" ? null : Number(parent),
-        }),
+    function populateModalDropdowns() {
+      catslect.innerHTML = '<option value="">No Parent</option>';
+      const procat = document.getElementById("procat");
+      if (procat) procat.innerHTML = '<option value="">Select a Category...</option>';
+      categories.forEach((category) => {
+        catslect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
       });
-      const data = await response.json();
-    });
+
+      const prostc = document.getElementById("prostc");
+      if (prostc) {
+        prostc.innerHTML = '<option value="">Select an Item...</option>';
+        products.forEach((p) => {
+          (p.variants || []).forEach((v) => {
+            prostc.innerHTML += `<option value="${v.id}">${p.name} (${v.sku})</option>`; 
+          });
+        });
+      }
+    }
+
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
