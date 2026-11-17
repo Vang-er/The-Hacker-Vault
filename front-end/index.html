@@ -123,7 +123,7 @@
               class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
             />
           </div>
-            <label></label>
+            <label for="catslect" class="block text-xs font-bold text-gray-700 mb-1">Parent Category</label>
             <select
               id="catslect"
               class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:bg-white focus:border-gray-500"
@@ -286,22 +286,9 @@
     const browserTitle = document.getElementById("browser-title");
     const browserGrid = document.getElementById("browser-grid");
     const browserBack = document.getElementById("browser-back");
-    const variantform = document.getElementById("var");
-    const productform = document.getElementById("pro");
-    const numlogs = document.getElementById("numlogs");
-    const homepage = document.getElementById("homepage");
     const swindow = document.getElementById("window");
     const backdrop = document.getElementById("backdrop");
-    const addstock = document.getElementById("addstock");
-    const searchtxt = document.getElementById("searchtxt");
-    const addcat = document.getElementById("addcat");
-    let stockpressed = false;
-    let catpresser = false;
-    const addvariants = document.getElementById("addvariants");
-    const cat = document.getElementById("cat");
-    const addpro = document.getElementById("addpro");
     const searchfeald = document.getElementById("searchfeald");
-    const stock = document.getElementById("stock");
 
     const csrfToken = document.querySelector(
       "[name=csrfmiddlewaretoken]",
@@ -310,7 +297,7 @@
       const card = document.createElement("div");
 
       card.className =
-        "cursor-pointer rounded-2xl bg-white p-5 shadow transition hover:scale-[1.02]";
+        "cursor-pointer rounded-xl bg-white border border-gray-200 p-5 shadow-xs transition hover:border-gray-400 hover:shadow-sm";
 
       card.innerHTML = `
         <h2 class="text-xl font-bold">
@@ -394,8 +381,16 @@
         (category) => category.id === categoryId,
       );
 
+      if (!category) return;
+
       browserTitle.textContent = category.name;
       browserBack.classList.remove("hidden");
+
+      if (category.parent) {
+        browserBack.onclick = () => openCategory(category.parent);
+      } else {
+        browserBack.onclick = () => showRootCategories();
+      }
 
       browserGrid.innerHTML = "";
 
@@ -451,11 +446,26 @@
 
       return card;
     }
+
+
     function openProduct(productId) {
       const product = products.find((product) => product.id === productId);
-
+      if (!product) return;
       browserTitle.textContent = product.name;
+      browserBack.classList.remove("hidden");
+      browserBack.onclick = () => {
+        if (product.category) {
+          openCategory(product.category);
+        } else {
+          showRootCategories();
+        }
+      };
       browserGrid.innerHTML = "";
+
+      if (!product.variants || product.variants.length ===0) {
+        browserGrid.innerHTML = `<p class="p-5 text-gray-500 italic col-span-full">No Variants available for this product.</p>`;
+        return;
+      }
 
       product.variants.forEach((variant) => {
         const card = document.createElement("div");
@@ -558,7 +568,7 @@
 
       const matches = products.filter((p) => {
         const matchName = p.name.toLowerCase().includes(query);
-        const matchBrand = (p.name || "").toLowerCase().includes(query);
+        const matchBrand = (p.brand || "").toLowerCase().includes(query);
         const matchSku = p.variants?.some((v) =>
           v.sku.toLowerCase().includes(query)
       );
@@ -678,7 +688,7 @@
         }).then(async (res) => {
           const data = await res.json();
           if (!res.ok) {
-            throw new Error(data.detail || `Faild to withdarw ${item.variantName}`);
+            throw new Error(data.detail || `Failed to withdraw ${item.variantName}`);
           }
           return data;
       })
@@ -697,16 +707,6 @@
   }
 }
 
-    function checkSearch() {
-      if (searchtxt) {
-        searchtxt.style.display = searchform.offsetWidth <= 250 ? "none" : "block";
-      }
-    }
-
-    checkSearch();
-
-    window.addEventListener("resize", checkSearch);
-    
     function switchTab(tab) {
       const forms = {
         cat: document.getElementById("cat"),
@@ -725,8 +725,8 @@
         forms[key].classList.toggle("flex", isActive);
 
         btns[key].className = isActive
-          ? "flex-1 py-1.5 text=xs font-bold rounded-md bg-white text-gray-900 shadow-xs cursor-pointer transition"
-          : "flex-1 py-1.5 text=xs font-bold rounded-md text-gray-600 hover:text-gray-900 cursor-pointer transition";
+          ? "flex-1 py-1.5 text-xs font-bold rounded-md bg-white text-gray-900 shadow-xs cursor-pointer transition"
+          : "flex-1 py-1.5 text-xs font-bold rounded-md text-gray-600 hover:text-gray-900 cursor-pointer transition";
       });
     }
 
@@ -747,6 +747,7 @@
       if (procat) procat.innerHTML = '<option value="">Select a Category...</option>';
       categories.forEach((category) => {
         catslect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+        if (procat) procat.innerHTML += `<option value="${category.id}">${category.name}</option>`;
       });
 
       const prostc = document.getElementById("prostc");
