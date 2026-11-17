@@ -760,6 +760,110 @@
       }
     }
 
+
+    document.getElementById("cat").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = document.getElementById("catname").value.trim();
+      const description = document.getElementById("catdes").value.trim();
+      const parent = document.getElementById("catslect").value;
+
+      try {
+        const res = await fetch("/api/categories/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({
+            name,
+            description,
+            parent: parent === "" ? null : Number(parent),
+          }),
+        });
+
+
+        if (!res.ok) throw new Error("Failed to create category");
+        document.getElementById("catname").value ="";
+        document.getElementById("catdes").value = "";
+        hidewindow();
+        await loadInventory();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+
+    document.getElementById("pro").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = document.getElementById("proname").value.trim();
+      const category = document.getElementById("procat").value;
+      const brand = document.getElementById("probrand").value.trim();
+      const description = document.getElementById("prodes").value.trim();
+
+      try {
+        const res = await fetch("/api/products/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({
+            name,
+            category: Number(category),
+            brand,
+            description,
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to create product");
+        document.getElementById("proname").value = "";
+        document.getElementById("probrand").value = "";
+        document.getElementById("prodes").value = "";
+
+        hidewindow();
+        await loadInventory();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+
+    document.getElementById("stock").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const variantId = document.getElementById("prostc").value;
+      const quantity = Number(document.getElementById("stockqty").value);
+      const note = document.getElementById("stocknote").value.trim();
+
+      const stockId = stockMap[variantId] || variantId;
+
+
+      try {
+        const res = await fetch(`/api/stock/${stockId}/receive/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({
+            quantity,
+            note: note || "Manual stock intake",
+          }),
+        });
+
+
+        if (!res.ok) throw new Error("Failed to receive stock");
+        document.getElementById("stocknote").value = "";
+        hidewindow();
+        await loadInventory();
+        alert(`Successfully added ${quantity} units to stock!`);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+
+    loadInventory();
+
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
