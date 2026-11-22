@@ -260,23 +260,42 @@
           ></div>
         </div>
       </main>
-
-
-
-
     </div>
-    <div id="withdraw-bar" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden bg-gray-800 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border-2 border-green-400">
-      <div>
-        <span class="text-xs uppercase tracking-wide text-gray-400">Total:</span>
-        <div id="withdraw-total-count" class="text-lg font-bold text-green-300">0</div>
+
+    <div
+    id="withdraw-bar"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-gray-800 items-center gap-5 transition-all"
+    >
+      <div class="flex items-center gap-3">
+        <span class="text-lg select-none"></span>
+        <div>
+          <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Withdrawal Queue</p>
+          <p id="withdraw-total-count" class="text-sm font-bold text-white">0 items (0 units)</p>
+        </div>
       </div>
-      <button id="withdraw-btn" onclick="executeBatchWithdraw()" class="bg-green-500 hover:bg-green-600 active:scale-95 text-black font-extrabold px-5 py-2.5 rounded-xl cursor-pointer transition-all shadow-md">
-        Confirm Withdrawal
-      </button>
-      <button onclick="clearWithdrawCart()" class="text-xs text-red-400 hover:underline cursor-pointer">
-        Clear
-      </button>
+
+      <div class="h-7 w-px bg-gray-700"></div>
+
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          onclick="clearWithdrawCart()"
+          class="text-xs font-semibold text-gray-400 hover:text-white cursor-pointer px-2.5 py-1.5 rounded-lg hover:bg-gray-800 transition"
+        >
+          Clear
+        </button>
+
+        <button
+        type="button"
+        id="withdraw-btn"
+        onclick="executeBatchWithdraw()"
+        class="cursor-pointer bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm"
+        >
+          Confirm Withdrawal
+        </button>
+      </div>
     </div>
+
   </body>
   <script>
     const catslect = document.getElementById("catslect");
@@ -743,17 +762,19 @@
 
     function updateBottomBar() {
       const bar = document.getElementById("withdraw-bar");
-      const totalCountE1 = document.getElementById("withdraw-total-count");
+      const totalCountEl = document.getElementById("withdraw-total-count");
 
-      const totalItems = Object.values(withdrawCart).reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
-      if (totalItems > 0) {
+      const items = Object.values(withdrawCart);
+      const totalUnits = items.reduce((sum, items) => sum + items.quantity, 0);
+      const itemCount = items.length;
+
+      if (totalUnits > 0) {
         bar.classList.remove("hidden");
-        totalCountE1.textContent = `${totalItems} unit${totalItems > 1 ? "s" : ""}`;
+        bar.classList.add("flex");
+        totalCountEl.textContent = `${itemCount} item${itemCount > 1 ? "s" : ""} (${totalUnits} unit${totalUnits > 1 ? "s" : ""})`;
       } else {
         bar.classList.add("hidden");
+        bar.classList.remove("flex")
       }
     }
 
