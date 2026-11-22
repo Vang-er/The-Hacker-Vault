@@ -6,9 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Stock History</title>
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+    <style>
+        .toast {
+            transform: translateX(120%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .toast.toast-show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    </style>
+
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen">
     {% csrf_token %}
+    <div id="toast-container" class="fixed top-16 right-5 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
     <nav
         class="w-full bg-white border-b border-gray-300 px-6 py-3 flex items-center justify-between sticky top-0 z-30"
     >
@@ -68,6 +82,39 @@
             const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
             const numlogs = document.getElementById("numlogs");
             const historyList = document.getElementById("history-list");
+            
+
+            function showToast(message, type = "success") {
+                const container = document.getElementById("toast-container");
+                if (!container) return;
+                const toast = document.createElement("div");
+                const isError = type === "error";
+                const borderColor = isError ? "border-l-red-500" : "border-l-green-600";
+                const icon = isError ? '<span class="text-red-500 font-black text-sm"></span>' : '<span class="text-green-600 font-black text-sm"></span>';
+
+                toast.className = `toast flex items-center gap-3 bg-white border border-gray-200 border-l-4 ${borderColor} rounded-xl px-4 py-3 shadow-lg text-sm text-gray-800 pointer-events-auto max-w-sm`;
+                toast.innerHTML = `
+                    ${icon}
+                    <span class="flex-1 font-medium">${message}</span>
+                    <button type="button" class="text-gray-400 hover:text-gray-700 text-xs font-bold ml-2 cursor-pointer">X</button>
+                `;
+
+                toast.querySelector("button").onclick = () => dismissToast(toast);
+                container.appendChild(toast);
+                
+                requestAnimationFrame(() => {
+                    toast.classList.add("toast-show");
+                });
+
+                setTimeout(() => dismissToast(toast), 3500);
+            }
+
+            function dismissToast(toast) {
+                toast.classList.remove("toast-show");
+                setTimeout(() => toast.remove(), 300)
+            }
+
+
             let stockMap = {};
 
             async function loadhistory() {
@@ -135,7 +182,7 @@
             const reverseQty = Math.abs(quantity);
             const confirmMsg = isWithdrawal
                 ? `Restore +${reverseQty} units of "${variantName}" back to stock?`
-                : `Remove -${reverseQty} unites of "${variantName}" from stock?`;
+                : `Remove -${reverseQty} units of "${variantName}" from stock?`;
             if (!confirm(confirmMsg)) return;
 
             let stockId= stockMap[variantId];
@@ -166,10 +213,10 @@
                 if (!response.ok) {
                     throw new Error(data.detail || "Failed to reverse the transaction");
                 }
-                alert(`Successfully reversed ${reverseQty} units.`);
+                showToast(`Successfully reversed ${reverseQty} units of "${variantName}".`, "success");
                 await loadhistory();
             } catch(err) {
-                alert("Cannot Undo: " + err.message);
+                showToast("Cannot Undo: " + err.message, "error");
             }
         }
 
@@ -181,7 +228,7 @@
                 const logs = data.results || data;
 
                 if (!logs || logs.length === 0) {
-                    alert("No History to export.");
+                    showToast("No history to export.", "error");
                     return;
                 }
 
@@ -213,8 +260,9 @@
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
+                showToast("CSV exported successfully!", "success");
             } catch (err) {
-                alert("Failed to export CSV: " + err.message);
+                showToast("Failed to export CSV: " + err.message, "error");
             }
         }
 
