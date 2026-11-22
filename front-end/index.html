@@ -60,12 +60,6 @@
       </div>
     </nav>
     <div class="" id="homepage">
-
-
-
-
-
-
       <div
         id="backdrop"
         onclick="hidewindow()"
@@ -249,16 +243,7 @@
       <main class="max-w-6xl mx-auto px-6 py-6">
         <div id="inventory-browser" class="w-full">
           <div class="flex items-center justify-between border-b pb-4 mb-6">
-            <div class="flex items-center gap-3">
-              <button
-                id="browser-back"
-                onclick="showRootCategories()"
-                class="hidden cursor-pointer rounded-lg bg-gray-800 hover:bg-black px-3 py-1.5 text-xs font-bold text-white transition active:scale-95"
-              >
-                <-Back
-              </button>
-              <h1 id="browser-title" class="text-2xl font-bold text-gray-900">Categories</h1>
-            </div>
+            <div id="browser-title" class="flex items-center flex-wrap gap-1.5 text-lg sm:text-xl font-bold text-gray-900"></div>
 
             <button
               type="button"
@@ -297,7 +282,6 @@
     const catslect = document.getElementById("catslect");
     const browserTitle = document.getElementById("browser-title");
     const browserGrid = document.getElementById("browser-grid");
-    const browserBack = document.getElementById("browser-back");
     const swindow = document.getElementById("window");
     const backdrop = document.getElementById("backdrop");
     const searchfeald = document.getElementById("searchfeald");
@@ -323,13 +307,39 @@
 
       return card;
     }
-    let varpressed = false;
-    let propressed = false;
     let categories = [];
     let products = [];
 
     let stockMap = {};
     let withdrawCart = {};
+
+    let currentProductId = null;
+
+    function setBreadcrumb(items) {
+      browserTitle.innerHTML = "";
+      items.forEach((item, index) => {
+        const isLast = index === items.length -1;
+
+        if (isLast){
+          const span = document.createElement("span");
+          span.className = "text-gray-900 font-bold truncate max-w-xs sm:max-w-md";
+          span.textContent = item.label;
+          browserTitle.appendChild(span);
+        } else {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "text-gray-500 hover:text-black hover:underline cursor-pointer transition font-medium";
+          btn.textContent = item.label;
+          btn.onclick = item.action;
+          browserTitle.appendChild(btn);
+
+          const sep = document.createElement("span");
+          sep.className = "text-gray-400 font-normal select-none mx-1";
+          sep.textContent = ">";
+          browserTitle.appendChild(sep);
+        }
+      });
+    }
 
     function showToast(message, type = "success") {
       const container = document.getElementById("toast-container");
@@ -396,14 +406,19 @@
       showRootCategories();
     }
     function showRootCategories() {
-      browserTitle.textContent = "Categories";
-      browserBack.classList.add("hidden");
+      currentProductId = null;
+      setBreadcrumb([{ label: "Main", action: null}]);
 
       browserGrid.innerHTML = "";
 
       const rootCategories = categories.filter(
         (category) => category.parent === null,
       );
+
+      if (rootCategories.length === 0) {
+        browserGrid.innerHTML = `<p class="p-5 text-gray-500 italic col-span-full">No Categories yet. Click "+ Add Items" to create one.</p>`;
+        return;
+      }
 
       rootCategories.forEach((category) => {
         const card = createCard(
@@ -425,14 +440,26 @@
 
       if (!category) return;
 
-      browserTitle.textContent = category.name;
-      browserBack.classList.remove("hidden");
-
-      if (category.parent) {
-        browserBack.onclick = () => openCategory(category.parent);
-      } else {
-        browserBack.onclick = () => showRootCategories();
+      currentProductId = null;
+      const path= [];
+      let curr = category;
+      while (curr) {
+        path.unshift(curr);
+        curr = curr.parent ? categories.find((c) => c.id === curr.parent) : null;
       }
+
+      const breadcrumbItems = [
+        { label: "Main", action: () => showRootCategories() }
+      ];
+
+      path.forEach((cat) => {
+        breadcrumbItems.push({
+          label: cat.name,
+          action: () => openCategory(cat.id),
+        });
+      });
+
+      setBreadcrumb(breadcrumbItems);
 
       browserGrid.innerHTML = "";
 
@@ -443,6 +470,11 @@
       const categoryProducts = products.filter(
         (product) => product.category === categoryId,
       );
+
+      if (subcategories.length === 0 && categoryProducts.length === 0) {
+        browserGrid.innerHTML = `<p class="p-5 text-gray-500 italic col-span-full">No products or sub-categories</p>`;
+        return;
+      }
 
       subcategories.forEach((subcategory) => {
         const card = createCard(
@@ -493,15 +525,33 @@
     function openProduct(productId) {
       const product = products.find((product) => product.id === productId);
       if (!product) return;
-      browserTitle.textContent = product.name;
-      browserBack.classList.remove("hidden");
-      browserBack.onclick = () => {
-        if (product.category) {
-          openCategory(product.category);
-        } else {
-          showRootCategories();
-        }
-      };
+
+      currentProductId = productId;
+
+      const path = [];
+      let curr = product.category ? categories.find((c) => c.id === product.category) : null;
+      while (curr) {
+        path.unshift(curr);
+        curr= curr.parent ? categories.find((c) => c.id === curr.parent) : null;
+      }
+
+      const breadcrumbItems = [
+        { label:"Main", action: () => showRootCategories()}
+      ];
+
+      path.forEach((cat) => {
+        breadcrumbItems.push({
+          label: cat.name,
+          action: () => openCategory(cat.id),
+        });
+      });
+
+      breadcrumbItems.push({
+        label:product.name,
+        action: null,
+      });
+
+      setBreadcrumb(breadcrumbItems);
       browserGrid.innerHTML = "";
 
       if (!product.variants || product.variants.length ===0) {
@@ -617,12 +667,20 @@
       return matchName || matchBrand || matchSku;
       });
 
-      browserTitle.textContent = `Search results for "${query}" (${matches.length})`;
-      browserBack.classList.remove("hidden");
-      browserBack.onclick= () => {
-        searchfeald.value ="";
-        showRootCategories();
-      };
+      setBreadcrumb([
+        {
+          label: "Main",
+          action: () => {
+            searchfeald.value = "";
+            showRootCategories();
+          },
+        },
+        {
+          label: `Search: "${query}" (${matches.length})`,
+          action: null,
+        },
+      ]);
+
 
       browserGrid.innerHTML = "";
       if (matches.length ===0 ) {
@@ -702,9 +760,7 @@
     function clearWithdrawCart() {
       withdrawCart = {};
       updateBottomBar();
-      const productTitle = browserTitle.textContent;
-      const currentProduct = products.find(p => p.name === productTitle);
-      if (currentProduct) openProduct(currentProduct.id);
+      if (currentProductId) openProduct(currentProductId);
     }
 
     async function executeBatchWithdraw() {
