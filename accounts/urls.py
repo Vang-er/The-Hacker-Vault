@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import ApiLoginView, ApiLogoutView, login, logout, dashboard,handleroot, ChangeCredentialsView, inventory_view, history_view
-
+from .views import (
+    ApiLoginView, ApiRegisterView, ApiLogoutView, login, logout, dashboard, 
+    handleroot, ChangeCredentialsView, inventory_view, history_view
+)
 urlpatterns = [
     path('',handleroot,name="handleroot"),
     path('login/', login, name="login"),
@@ -9,6 +11,7 @@ urlpatterns = [
     path('inventory/', inventory_view, name="inventory"),
     path('history/', history_view, name="history"),
     path('login-api/', ApiLoginView.as_view(), name="login-api"),
+    path('register-api/', ApiRegisterView.as_view(), name="login-api"),
     path('logout-api/', ApiLogoutView.as_view(), name="logout-api"),
     path('change-credentials/', ChangeCredentialsView.as_view(), name="change-credentials")
 ]
