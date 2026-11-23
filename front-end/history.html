@@ -161,7 +161,7 @@
                         
                         <button
                             type="button"
-                            onclick="undoMovement(${item.variant}, ${item.quantity}, '${(item.variant_name || '').replace(/'/g, "\\'")}')"
+                            onclick="undoMovement(${item.id}, ${item.quantity}, '${(item.variant_name || '').replace(/'/g, "\\'")}')"
                             class="bg-gray-800 hover:bg-black text-white text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition active:scale-95"
                         >
                             Undo
@@ -184,36 +184,22 @@
                 ? `Restore +${reverseQty} units of "${variantName}" back to stock?`
                 : `Remove -${reverseQty} units of "${variantName}" from stock?`;
             if (!confirm(confirmMsg)) return;
-
-            let stockId= stockMap[variantId];
-            if (!stockId) {
-                const res= await fetch("/api/stock/");
-                const data= await res.json();
-                const stocks = data.results || data;
-                stocks.forEach((st)=> (stockMap[st.variant] = st.id));
-                stockId = stockMap[variantId] || variantId;
-            }
-            const endpoint = isWithdrawal
-                ? `/api/stock/${stockId}/receive/`
-                : `/api/stock/${stockId}/issue/`;
+            
             try {
-                const response = await fetch(endpoint, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken,
-                    },
-                    body: JSON.stringify({
-                        quantity: reverseQty,
-                        note: `Undo (${variantName})`
-                    }),
+                const response = await fetch(`/api/stock-movements/${movementId}/undo/`, {
+                   method: "POST",
+                   headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken,
+                   },
                 });
 
-                const data = await response.json();
+                const data = await response.jspon();
                 if (!response.ok) {
-                    throw new Error(data.detail || "Failed to reverse the transaction");
+                    throw new Error(data.detail || "Failed to undo movement");
                 }
-                showToast(`Successfully reversed ${reverseQty} units of "${variantName}".`, "success");
+
+                showToast(`Successfully Undo: restored ${reverseQty} units of "${variantName}".`, "success");
                 await loadhistory();
             } catch(err) {
                 showToast("Cannot Undo: " + err.message, "error");
@@ -255,7 +241,7 @@
                 const link = document.createElement("a");
 
                 link.href = url;
-                link.download = `warehouse_history_${new Date().toISOString().slice(0, 10)}.csv`;
+                link.download = `warehouse_history_${new Data().toISOString().slice(0, 10)}.csv`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

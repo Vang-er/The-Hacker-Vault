@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db.models import F
+from django.db import transaction
 
 # Create your views here.
 
@@ -98,3 +99,26 @@ class StockMovementViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(reason=reason)
 
         return queryset
+
+    @action(detail=True, methods=["post"])
+    def undo(self, request, pk=None):
+        movement = self.get_object()
+        variant = movement.variant
+
+        with transaction.atomic():
+            stock = Stock.objects.select_for_update().get(variant=variant)
+            reversal_delta = -movement.quantity
+            new_quantity = stock.quantity + reversal_delta
+
+            if new_quantity < 0:
+                return Response(
+                    {"detail": f"Cannot undo: Stock for {variant.sku} would drop below zero ({stock.quantity} on hand)."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            stock.quantity = new_quantity
+            stock.save()
+            movement.delete()
+        return Response(
+            {"detail": f"Successfully undone. Restored {abs(reversal_delta)} units."},
+            status=status.HTTP_200_OK,
+        )
