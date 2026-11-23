@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login as django_login, logout as django_logout, authenticate , update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from .models import User
 
 from rest_framework import status
 from rest_framework.views import APIView
