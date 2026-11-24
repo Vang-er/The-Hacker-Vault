@@ -1,96 +1,43 @@
 # Haker Warehouse
 
-### V.02
-
 ## A web Application that you can control your invintory on it, you can add product or remove product and add categories or remove it you can see your history or your dashboard.
 
-## What is new in that week ?!!
+<img src="README assets/Untitled11">
+<img src="README assets/Untitled22">
+<img src="README assets/Untitled33">
 
-### we made a whole new UI made from tailwind-CSS framework and refactor some of the backend logics with putting the foundations to enable uploading Images in the future realses
+### Tech Stack
 
-## new UI!
+- **Backend:** Python, Django, Django REST Framework
+- **Database:** PostgreSQL
+- **Frontend:** Vanilla JavaScript, Tailwind CSS, HTML5
+- **Auth:** Django Sessions & JWT
 
-<img src="README assets/5.png">
-<img src="README assets/6.png">
-<img src="README assets/7.png">
-<img src="README assets/8.png">
+## How to Use
 
-## Teach Stack
+1. **Log in or Register:** Create an account or sign in with your credentials.
+2. **Browse Inventory:** Click through categories and subcategories.
+3. **Add Items:** create a new Category, Product, or receive Stock.
+4. **Withdraw Stock:** Open any product, use the **+ / -** counters on its variants.
+5. **View History:** Click **History** in the navigation bar to review stock movements, undo mistakes, or export records to CSV.
 
-<bl>
-    <li>
-        HTML
-    </li>
-    <li>
-    CSS
-    </li>
-    <li>
-    JAVASCRIPT
-    </li>
-    <li>
-    PYTHON
-    </li>
-    <li>
-    DJANGO
-    </li>
-    <li>
-    REST-API
-    </li>
-    <li>
-    POSTGRE-SQL
-    </li>
-</bl>
-
-## How to use it
-
-- 1-log in
-- 2-click + icon in the bottom right
-- 3-choose from ( add category / add product / add variant / add stock) to add it
-- 4-fill its form
-- 5-click submit
-
-## the username and the password is : vanger
+#### There is no real Login system yet :D -anyone can create an account that can access the main DB- 
 
 ## The team
 
-- Timo
-- week 1
-- - made the backend logic
-- - made the DB shcemia
-- week 2
-- Baraa
-- week 1
-- - log in page frontend
-- - all pages in main page exept history
-- week 2
-- -
-- Mohammed
-- week 1
-- - Asisted in Backend
-- - Asisted in Frontend
-- week 2
-- -
+- Timo : Did the DataBase structure and the BackEnd, Also did the new UI/UX.
+- Mohammed : Asisted ALOT in both the Front&Back ends, Also configured the API endpoints.
+- Baraa : Did the old Frontend structure.
 
 ## our server 🙂
 
 ### You can test the latest version on our UNIQUE domain <a href="https://hackerwarehouse.shop">hackerwarehouse.shop</a> (which we bougth with our pocket money at 2AM,LOL!!) !!!
 
-#### login credentials is <bold>vanger</bold> , <bold>vanger</bold> .....truly secert and hard to find
+### To test the back end please visit hackerwarehouse.shop/admin/ with the same login crednitials to test the back end
 
-<img src="README assets/new1.png">
-<img src="README assets/new2.png">
-<img src="README assets/new3.png">
-<img src="README assets/new4.png">
+### to run the server run "python manage.py runserver"
 
-## To test the back end please visit hackerwarehouse.shop/admin/ with the same login crednitials to test the back end
-
-## We hosted our site on a 32 bit potato pc,LOL
-
-# Team instruction to themselfes!
-
-## to run the server run "python manage.py runserver"
-
-## to run the tailwind css while devlopment run
+### to run the tailwind css while devlopment run
 
 ````npx @tailwindcss/cli \
   -i ./static/css/input.css \
