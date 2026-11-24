@@ -2,9 +2,12 @@
 
 ## A web Application that you can control your invintory on it, you can add product or remove product and add categories or remove it you can see your history or your dashboard.
 
-<img src="README assets/Untitled11">
-<img src="README assets/Untitled22">
-<img src="README assets/Untitled33">
+<img width="1556" height="748" alt="image" src="https://github.com/user-attachments/assets/7fe43bec-5ee4-4874-8929-ad685885ce3c" />
+<img width="1600" height="896" alt="image" src="https://github.com/user-attachments/assets/21ed86cb-2a06-4f3a-8c87-8309a8cc5bfa" />
+<img width="1551" height="744" alt="image" src="https://github.com/user-attachments/assets/bb818a36-f14b-492f-806e-8f8f16b679e6" />
+
+
+
 
 ### Tech Stack
 
